@@ -1,0 +1,15 @@
+# --- Vooblr: keep only deployable assets tracked ---
+
+# Working/markdown docs — ignore all except the PRD
+*.md
+!meme-content-engine-prd.md
+
+# Local scratch / generated
+logo_check*.png
+logo_v*.png
+*.tmp
+*.log
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
