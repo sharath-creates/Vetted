@@ -1,0 +1,196 @@
+<!-- Brief intake form — posts to your n8n Webhook node.
+     Replace WEBHOOK_URL and FORM_SECRET below. Drop this into your landing page
+     (or host as-is). Fields map 1:1 to the workflow's `brief`: company, persona,
+     geography, product.
+
+     Themed to the daisyUI design system:
+       primary #570DF8 · Inter · 8px controls / 16px card · hover darken (120ms) +
+       press scale(0.97) · primary focus ring. Override the --bi-* tokens to retheme.
+-->
+<div id="brief-intake">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    #brief-intake {
+      /* daisyUI tokens */
+      --bi-primary:#570DF8;
+      --bi-primary-focus:#4506cb;
+      --bi-primary-content:#ffffff;
+      --bi-fg:#1F2937;            /* base-content */
+      --bi-muted:#6B7280;
+      --bi-base-100:#ffffff;
+      --bi-base-200:#F2F2F2;
+      --bi-border:#E5E6E6;        /* base-300 */
+      --bi-error:#F97272;
+      --bi-success:#37D39A;
+      --bi-radius-control:8px;    /* lg — buttons/inputs */
+      --bi-radius-card:16px;      /* 2xl — cards */
+      --bi-space:16px;            /* 4px grid base */
+      max-width:560px; margin:0 auto;
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      color:var(--bi-fg); line-height:1.5;
+    }
+    #brief-intake * { box-sizing:border-box; }
+    #brief-intake .card {
+      background:var(--bi-base-100); border-radius:var(--bi-radius-card);
+      padding:28px 26px;
+      box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1); /* shadow-lg */
+    }
+    #brief-intake h2 { margin:0 0 4px; font-size:1.5rem; font-weight:700; letter-spacing:-0.02em; }
+    #brief-intake p.sub { margin:0 0 20px; color:var(--bi-muted); font-size:.875rem; }
+    #brief-intake label { display:block; font-size:.8125rem; font-weight:600; margin:var(--bi-space) 0 6px; }
+    #brief-intake label .req { color:var(--bi-primary); }
+    #brief-intake input, #brief-intake textarea {
+      width:100%; background:var(--bi-base-100); border:1px solid var(--bi-border);
+      border-radius:var(--bi-radius-control); color:var(--bi-fg);
+      padding:10px 12px; font-size:.875rem; font-family:inherit; outline:none;
+      transition:border-color .12s, box-shadow .12s;
+    }
+    #brief-intake input:focus, #brief-intake textarea:focus {
+      border-color:var(--bi-primary);
+      box-shadow:0 0 0 2px color-mix(in srgb, var(--bi-primary) 30%, transparent); /* primary focus ring */
+    }
+    #brief-intake textarea { min-height:90px; resize:vertical; }
+    #brief-intake .hint { color:var(--bi-muted); font-size:.75rem; margin-top:5px; }
+    #brief-intake .err-msg { color:var(--bi-error); font-size:.75rem; margin-top:6px; display:none; }
+    #brief-intake button {
+      margin-top:24px; width:100%; border:0; border-radius:var(--bi-radius-control);
+      padding:12px; font-size:.9375rem; font-weight:600; font-family:inherit;
+      color:var(--bi-primary-content); background:var(--bi-primary); cursor:pointer;
+      transition:background-color .12s, transform .08s;
+    }
+    #brief-intake button:hover { background:var(--bi-primary-focus); }   /* darken to -focus */
+    #brief-intake button:active { transform:scale(0.97); }              /* press */
+    #brief-intake button:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+    /* Honeypot: hidden from humans, tempting to bots */
+    #brief-intake .hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+    #brief-intake .state { text-align:center; padding:24px 0; }
+    #brief-intake .state svg { width:48px; height:48px; }
+    #brief-intake .state h3 { margin:14px 0 4px; font-weight:600; }
+    #brief-intake .state p { color:var(--bi-muted); font-size:.875rem; margin:0; }
+    #brief-intake .form-error {
+      background:color-mix(in srgb, var(--bi-error) 10%, transparent);
+      border:1px solid var(--bi-error); color:#b42318;
+      border-radius:var(--bi-radius-control); padding:10px 12px; font-size:.8125rem;
+      margin-top:var(--bi-space); display:none;
+    }
+  </style>
+
+  <div class="card">
+    <form id="briefForm" novalidate>
+      <h2>Get your meme mockups</h2>
+      <p class="sub">Tell us about the product. We'll match it to today's trending formats and send back 3 mockups.</p>
+
+      <label for="bf-company">Company <span class="req">*</span></label>
+      <input id="bf-company" name="company" type="text" autocomplete="organization" required />
+      <div class="err-msg" data-for="company">Please enter your company.</div>
+
+      <label for="bf-product">Product to promote <span class="req">*</span></label>
+      <input id="bf-product" name="product" type="text" required />
+      <div class="err-msg" data-for="product">Please name the product.</div>
+
+      <label for="bf-persona">Consumer persona <span class="req">*</span></label>
+      <textarea id="bf-persona" name="persona" placeholder="Who are we talking to? Age, vibe, what they care about, how they talk."></textarea>
+      <div class="err-msg" data-for="persona">Please describe the audience.</div>
+
+      <label for="bf-geography">Market / language <span class="req">*</span></label>
+      <input id="bf-geography" name="geography" list="bf-markets" placeholder="e.g. US, UK, India (English)" required />
+      <datalist id="bf-markets">
+        <option value="US (English)"></option>
+        <option value="UK (English)"></option>
+        <option value="India (English)"></option>
+        <option value="Global (English)"></option>
+      </datalist>
+      <div class="hint">Drives which trends we match and the caption's language.</div>
+      <div class="err-msg" data-for="geography">Please set a market.</div>
+
+      <!-- Honeypot — leave empty; bots fill it and get rejected -->
+      <div class="hp" aria-hidden="true">
+        <label>Do not fill this</label>
+        <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <button type="submit" id="bf-submit">Generate my memes</button>
+      <div class="form-error" id="bf-formError">Something went wrong sending that. Please try again.</div>
+    </form>
+
+    <div class="state" id="bf-success" style="display:none;">
+      <!-- outline check (daisyUI / Heroicons style, success color) -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="#37D39A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 12l3 3 5-6"></path>
+      </svg>
+      <h3>Brief received</h3>
+      <p>Your memes are cooking. We'll have 3 mockups ready for review shortly.</p>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // ---- CONFIGURE THESE TWO ----
+      var WEBHOOK_URL = "WEBHOOK_URL";        // n8n Webhook node production URL
+      var FORM_SECRET = "FORM_SECRET";        // must match the value n8n checks in the header
+      // -----------------------------
+
+      var form = document.getElementById("briefForm");
+      var submitBtn = document.getElementById("bf-submit");
+      var formError = document.getElementById("bf-formError");
+      var successEl = document.getElementById("bf-success");
+      var required = ["company", "product", "persona", "geography"];
+
+      function showFieldErrors() {
+        var ok = true;
+        document.querySelectorAll("#brief-intake .err-msg").forEach(function (e) { e.style.display = "none"; });
+        required.forEach(function (name) {
+          var val = (form.elements[name].value || "").trim();
+          if (!val) {
+            var msg = document.querySelector('#brief-intake .err-msg[data-for="' + name + '"]');
+            if (msg) msg.style.display = "block";
+            ok = false;
+          }
+        });
+        return ok;
+      }
+
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        formError.style.display = "none";
+
+        // Honeypot tripped → silently pretend success, don't call the webhook
+        if ((form.elements["website"].value || "").trim() !== "") {
+          form.style.display = "none";
+          successEl.style.display = "block";
+          return;
+        }
+        if (!showFieldErrors()) return;
+
+        var payload = {
+          company: form.elements["company"].value.trim(),
+          product: form.elements["product"].value.trim(),
+          persona: form.elements["persona"].value.trim(),
+          geography: form.elements["geography"].value.trim(),
+          submitted_at: new Date().toISOString()
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending…";
+
+        fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Form-Secret": FORM_SECRET },
+          body: JSON.stringify(payload)
+        })
+          .then(function (r) {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            form.style.display = "none";
+            successEl.style.display = "block";
+          })
+          .catch(function () {
+            formError.style.display = "block";
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Generate my memes";
+          });
+      });
+    })();
+  </script>
+</div>

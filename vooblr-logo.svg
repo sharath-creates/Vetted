@@ -1,0 +1,6 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" fill="none" role="img" aria-label="Vooblr">
+  <path d="M21 17 L39 60 L49 34" stroke="#7DB89E" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M47 31 C48 23, 54 21, 60 24" stroke="#7DB89E" stroke-width="11" stroke-linecap="round" fill="none"/>
+  <path d="M57 22 L63 27 L56 41 Z" fill="#5E9C82"/>
+  <path d="M51 32 L59 25" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.92"/>
+</svg>
