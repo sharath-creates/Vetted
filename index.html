@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Vooblr — your product, in the memes everyone's already sharing</title>
+<link rel="icon" type="image/svg+xml" href="vooblr-logo.svg" />
+<link rel="apple-touch-icon" href="vooblr-logo.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
@@ -424,10 +426,4 @@
       btn.disabled = true; btn.textContent = 'Sending…';
       fetch(WEBHOOK_URL, { method:'POST', headers:{ 'Content-Type':'application/json','X-Form-Secret':FORM_SECRET }, body:JSON.stringify(payload) })
         .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); form.style.display='none'; done.style.display='block'; })
-        .catch(function(){ errBox.style.display='block'; btn.disabled=false; btn.textContent='Generate my memes'; });
-    });
-  })();
-</script>
-</body>
-</html>
-       
+        .catch(function(){ errBox.style.display=
