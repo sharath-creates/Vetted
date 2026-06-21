@@ -82,13 +82,16 @@
   .hero .note { margin-top:14px; font-size:.82rem; color:var(--muted); }
 
   /* ---------- meme mockup strip ---------- */
-  .strip { display:flex; gap:16px; justify-content:center; margin-top:56px; flex-wrap:wrap; }
+  .strip-label { margin-top:48px; font-size:.72rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .strip { display:flex; gap:16px; justify-content:center; margin-top:14px; flex-wrap:wrap; }
   .mock { width:208px; background:var(--base-100); border:1px solid var(--border); border-radius:var(--radius-card);
     box-shadow:var(--shadow-lg); overflow:hidden; text-align:left; }
   .mock .img { height:128px; display:grid; place-items:center; color:#fff; font-weight:700; font-size:.85rem; text-align:center; padding:10px; }
-  .mock:nth-child(1) .img { background:linear-gradient(135deg,#2F9072,#4FA98C); }
-  .mock:nth-child(2) .img { background:linear-gradient(135deg,#149684,#36b3a1); }
-  .mock:nth-child(3) .img { background:linear-gradient(135deg,#3E7C66,#5fa085); }
+  /* live cards render the format image as the visual */
+  .mock .img.photo { background-size:cover; background-position:center; background-repeat:no-repeat; padding:0; }
+  .mock .img.meme { padding:0; background:#f4f5f7; }
+  .mock .img.meme img { width:100%; height:100%; object-fit:contain; display:block; }
+  .mock .img.ph { display:grid; place-items:center; color:var(--muted); font-size:.72rem; font-weight:600; text-align:center; padding:8px; background:#f4f5f7; }
   .mock .meta { padding:12px 14px; }
   .mock .meta .tag { font-size:.68rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:.04em; }
   .mock .meta .name { font-size:.9rem; font-weight:600; margin-top:3px; }
@@ -192,10 +195,25 @@
     </div>
     <p class="note">Free to start. No card. You approve every mockup before it goes anywhere.</p>
 
-    <div class="strip" aria-hidden="true">
-      <div class="mock"><div class="img">When the new feature ships itself</div><div class="meta"><div class="tag">Trending · Imgflip</div><div class="name">Drake Hotline Bling</div></div></div>
-      <div class="mock"><div class="img">Me explaining the ROI to finance</div><div class="meta"><div class="tag">Rising · Giphy</div><div class="name">Two Buttons</div></div></div>
-      <div class="mock"><div class="img">Switching from spreadsheets, finally</div><div class="meta"><div class="tag">Trending · Imgflip</div><div class="name">Distracted Boyfriend</div></div></div>
+    <p class="strip-label" id="stripLabel">Trending right now</p>
+    <div class="strip" id="memeStrip">
+      <!-- Real memes from the Imgflip flow. Drop the two images into this folder as
+           meme-1.jpg and meme-2.jpg, OR replace the src with their imgflip URLs. -->
+      <div class="mock">
+        <div class="img meme">
+          <img src="meme-1.jpg" alt="Drake meme: boring ads vs trending memes"
+               onerror="if(!this.dataset.f){this.dataset.f='1';this.src='https://i.imgflip.com/auu3c5.jpg';}else{this.style.display='none';this.parentNode.classList.add('ph');this.parentNode.textContent='Meme unavailable';}" />
+        </div>
+        <div class="meta"><div class="tag">Trending · Imgflip</div><div class="name">Drake Hotline Bling</div></div>
+      </div>
+
+      <div class="mock">
+        <div class="img meme">
+          <img src="meme-2.gif" alt="Tesla and Einstein meme: your social team after Vooblr"
+               onerror="if(!this.dataset.f){this.dataset.f='1';this.src='https://i.imgflip.com/auu3az.gif';}else{this.style.display='none';this.parentNode.classList.add('ph');this.parentNode.textContent='Meme unavailable';}" />
+        </div>
+        <div class="meta"><div class="tag">Trending · Imgflip</div><div class="name">Tesla vs Einstein</div></div>
+      </div>
     </div>
   </div>
 </header>
@@ -340,6 +358,38 @@
 
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // ---- Live "trending right now" strip ----
+  // Pulls the current top 3 from the workflow (n8n GET webhook reading top3_today).
+  // Returns: [{ name, source, url, velocity }]. Falls back to the static samples if it fails.
+  (function () {
+    var TOP3_URL = "TOP3_URL"; // n8n GET webhook returning the top 3 as JSON
+    if (!TOP3_URL || TOP3_URL === "TOP3_URL") return; // not configured yet → keep samples
+
+    function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+    fetch(TOP3_URL, { headers: { 'Accept': 'application/json' } })
+      .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+      .then(function(list){
+        if (!Array.isArray(list) || !list.length) return;
+        var strip = document.getElementById('memeStrip');
+        strip.innerHTML = list.slice(0, 3).map(function(m){
+          var src = (m.source || '').toString();
+          var tag = (src.toLowerCase() === 'giphy' ? 'Rising · ' : 'Trending · ') +
+                    (src ? src.charAt(0).toUpperCase() + src.slice(1) : 'Trending');
+          var img = m.url
+            ? '<div class="img photo" style="background-image:url(\'' + esc(m.url) + '\')"></div>'
+            : '<div class="img"></div>';
+          return '<div class="mock">' + img +
+                 '<div class="meta"><div class="tag">' + esc(tag) + '</div>' +
+                 '<div class="name">' + esc(m.name) + '</div></div></div>';
+        }).join('');
+        var lbl = document.getElementById('stripLabel');
+        if (lbl) lbl.textContent = 'Trending right now';
+      })
+      .catch(function(){ /* keep the static fallback */ });
+  })();
 
   (function () {
     // ---- CONFIGURE ----
